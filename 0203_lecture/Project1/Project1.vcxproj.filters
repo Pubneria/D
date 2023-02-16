@@ -78,7 +78,10 @@
     <ClCompile Include="프로젝트1.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="프로젝트2cpp.cpp">
+    <ClCompile Include="프로젝트2.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="프로젝트3.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
