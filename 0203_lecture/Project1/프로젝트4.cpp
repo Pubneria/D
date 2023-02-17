@@ -22,7 +22,7 @@ int main() {
 	
 	for (int i = 2; i < n * n + 1; i++) 
 	{
-		if (i % n == 0) //i가 n의배수일때
+		if (i % n == 1) //i가 n의배수일때
 		{
 			row= row%n +1;
 			arr[row - 1][column-1] = i;
