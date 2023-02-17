@@ -18,15 +18,9 @@ int main() {
 	
 		
 	    cout << "사용자가부른숫자!\n";
-	    if (num == 1) 
+		for (int i = num-1; i >=0; i--)
 		{
-		cout << lastnum <<"\n";
-		}
-		else if (num == 2) {
-		cout << lastnum - 1 << "\n" << lastnum << "\n";
-		}
-		else {
-		cout << lastnum - 2 << "\n" << lastnum - 1 << "\n" << lastnum << "\n";
+			cout << lastnum-i << "\n";
 		}
 
 		if (lastnum>= 31) {
@@ -34,19 +28,15 @@ int main() {
 			break;
 		}
 
-
 		cout << "컴퓨터가 부른 숫자!\n";
 		randnum = rand() % 3 + 1;
 		lastnum += randnum;
-		if (randnum == 1) {
-			cout << lastnum << endl;
+
+		for (int i = randnum - 1; i >= 0; i--)
+		{
+			cout << lastnum - i << "\n";
 		}
-		else if (randnum == 2) {
-			cout << lastnum - 1 << endl << lastnum << endl;
-		}
-		else {
-			cout << lastnum - 2 << endl << lastnum - 1 << endl << lastnum << endl;
-		}
+		
 		if (lastnum >= 31) {
 			cout << "게임 종료! 사용자의 승리입니다.";
 			break;

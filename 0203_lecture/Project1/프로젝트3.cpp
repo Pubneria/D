@@ -10,32 +10,26 @@ int main() {
 	int temp;
 	int t = 0;
 
+
 	for (int i = 0; i < 6; i++) {
-		while (1) {
-			random[i] = rand() % 25 + 1;
-			temp = 0;
-			for (int j = 0; j < i ; j++) {
-
-				if (random[i] == random[j]) {
-					temp = 1;
-					break;
-				}
+		random[i]= rand() % 25 + 1;
+		for (int j = 0; j < i; j++) {
+			if (random[j] == random[i]) {
+				i--;
 			}
-
-			if (temp == 0) 
-			break;
 		}
 	}
+
 	cout << "숫자는1-25까지만 입력가능합니다\n";
 
 	for (int i = 0; i < 6; i++) {
-		while (1) {
+		
 			cout << i+1<<"번째숫자입력하세요\n";
 			cin>> user[i];
 			temp = 0;
 			if (user[i] > 25 || user[i] < 1)
 			{
-				cout << "잘못된숫자입니다. 다시입력해주세요\n";
+				cout << "범위를벗어난 숫자입니다. 다시입력해주세요\n";
 				temp = 1;
 			}
 			else
@@ -44,18 +38,16 @@ int main() {
 				for (int j = 0; j < i; j++) {
 
 					if (user[i] == user[j]) {
-						cout << "잘못된숫자입니다. 다시입력해주세요\n";
-						temp = 1;
-						break;
+						cout << "중복된숫자입니다. 다시입력해주세요\n";
+						i--;
+					
 					}
 				}
 				//cout << temp<<"\n";
 				
 			}
-			//cout << temp << "\n";
-			if (temp == 0) 
-			break;
-		}
+			
+		
 	}
 
 
