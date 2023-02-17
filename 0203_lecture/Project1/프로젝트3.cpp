@@ -43,7 +43,7 @@ int main() {
 					
 					}
 				}
-				//cout << temp<<"\n";
+				
 				
 			}
 			
