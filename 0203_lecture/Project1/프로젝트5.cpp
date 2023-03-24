@@ -6,11 +6,11 @@
 using namespace std;
 
 
-
-
 int main() {
 	srand(time(NULL));
-	int length = 3;
+	const int length = 3;
+	const int maxint = 9;
+	const int minint = 1;
 	int* random = new int[length];
 	int* user = new int[length];
 	int temp=0;
@@ -18,7 +18,7 @@ int main() {
 
 
 	for (int i = 0; i < length; i++) {
-		random[i]= rand() % 9 + 1;
+		random[i]= rand() % maxint + 1;
 		for (int j = 0; j < i; j++) {
 			if (random[j] == random[i]) {
 				i--;
@@ -36,7 +36,7 @@ int main() {
 		cout << "1-9사이의 숫자 3개를 입력하세요(이외의 숫자: 종료)\n";
 		for (int i = 0; i < length; i++) {
 			cin >> user[i];
-			if (user[i] > 9 || user[i] < 1)
+			if (user[i] > maxint || user[i] < minint)
 			{t = 1;
 			}
 			
@@ -50,7 +50,6 @@ int main() {
 			}
 			
 
-
 		}
 
 		if (t == 1)
@@ -63,13 +62,6 @@ int main() {
 		}
 		else {
 			cout << temp<<"번만에 성공 \n";
-			/*cout << "공개!\n";
-
-			for (int i = 0; i < length; i++) {
-				cout << random[i] << setw(5);
-			}
-			cout << "\n";
-			*/
 			break;
 		}
 
