@@ -20,7 +20,7 @@ using std::vector;
 using std::thread;
 // for demonstration only. never save your password in the code!
 
-void DBCREATE();//DB생성함수
+
 
 struct SOCKET_INFO {
 	SOCKET sck;
@@ -46,13 +46,88 @@ void recv_msg(int idx);
 //5. 소켓 닫아줌.
 void del_client(int idx);
 int main() {
+	// MySQL Connector/C++ 초기화
+	string server = "tcp://127.0.0.1:3306"; // 데이터베이스 주소
+	string username = "user"; // 데이터베이스 사용자
+	string password = "1234"; // 데이터베이스 접속 비밀번호
+	sql::Driver* driver; // 추후 해제하지 않아도 Connector/C++가 자동으로 해제해 줌
+	sql::Connection* con;
+	sql::Statement* stmt;
+	sql::PreparedStatement* pstmt;
+	sql::ResultSet* result;
+	//sql::
+
 	WSADATA wsa;
 	int code = WSAStartup(MAKEWORD(2, 2), &wsa);
 	// winsock version 2.2 사용
 	// winsock 초기화 하는 함수
 	// 실행 성공하면 0 반환, 실패하면 0 이외의 값 반환
+
+
+	try //커넥터 사전작업
+	{
+		driver = get_driver_instance();
+		con = driver->connect(server, username, password);
+	}
+	catch (sql::SQLException e)
+	{
+		cout << "Could not connect to server. Error message: " << e.what() << endl;
+		system("pause");
+		exit(1);
+	}
+	// please create database "chatuser_db" ahead of time
+	con->setSchema("chatuser_db");
+	// connector에서 한글 출력을 위한 셋팅
+	stmt = con->createStatement(); // 추가!!
+	stmt->execute("set names euckr"); // 추가!!
+	if (stmt) { delete stmt; stmt = nullptr; } // 추가!!
+	// 데이터베이스 쿼리 실행
+	//chatuser테이블 생성
+	stmt = con->createStatement();
+	stmt->execute("DROP TABLE IF EXISTS chatuser");
+	cout << "Finished dropping table (if existed)" << endl;
+	stmt->execute("CREATE TABLE chatuser (id serial PRIMARY KEY, name VARCHAR(50), password INTEGER);");
+	cout << "Finished creating table" << endl;
+	//stmt = con->createStatement();
+	//chathistory테이블 생성
+	stmt = con->createStatement();
+	stmt->execute("DROP TABLE IF EXISTS chat");
+	cout << "Finished dropping table (if existed)" << endl;
+	stmt->execute("CREATE TABLE chat (id serial PRIMARY KEY, name VARCHAR(50), chat VARCHAR(50));");
+	cout << "Finished creating table" << endl;
+	delete stmt;
+
+	pstmt = con->prepareStatement("INSERT INTO chatuser(name, password) VALUES(?,?)");
+	pstmt->setString(1, "박지원");
+	pstmt->setInt(2, 1087);
+	pstmt->execute();
+	cout << "One row inserted." << endl;
+	pstmt->setString(1, "김정관");
+	pstmt->setInt(2, 9876);
+	pstmt->execute();
+	cout << "One row inserted." << endl;
+	
+	
+
+	//아이디/비번 DB에서 검색해서 있는지 확인
+	pstmt = con->prepareStatement("SELECT name, password FROM chatuser;");
+	result = pstmt->executeQuery();
+
+	while (result->next())
+	{
+		printf("Reading from table=(%s, %d)\n", result->getString(1).c_str(), result->getInt(2));
+
+	}
+	
+	// 통신시작
+
+	//WSADATA wsa;
+	//int code = WSAStartup(MAKEWORD(2, 2), &wsa);
+	// winsock version 2.2 사용
+	// winsock 초기화 하는 함수
+	// 실행 성공하면 0 반환, 실패하면 0 이외의 값 반환
 	if (!code) {
-		DBCREATE();
+		
 		server_init();
 
 		std::thread th1[MAX_CLIENT];
@@ -65,14 +140,20 @@ int main() {
 			const char* buf = text.c_str();
 			msg = server_sock.user + ':' + buf;
 			send_msg(msg.c_str());
+		
+			
 		}
 		for (int i = 0; MAX_CLIENT; i++) {
 			th1[i].join();
 		}
+	
 		closesocket(server_sock.sck);
 		WSACleanup();
 		return 0;
 	}
+
+	delete pstmt;
+	delete con;
 }
 /*함수 구현부*/
 //1. 소켓 초기화
@@ -167,62 +248,4 @@ void del_client(int idx) {
 	client_count--;
 }
 
-void DBCREATE()
-{	// MySQL Connector/C++ 초기화
-	string server = "tcp://127.0.0.1:3306"; // 데이터베이스 주소
-	string username = "user"; // 데이터베이스 사용자
-	string password = "1234"; // 데이터베이스 접속 비밀번호
-	sql::Driver* driver; // 추후 해제하지 않아도 Connector/C++가 자동으로 해제해 줌
-	sql::Connection* con;
-	sql::Statement* stmt;
-	sql::PreparedStatement* pstmt;
-	sql::ResultSet* result;
-	//sql::
-	try //커넥터 사전작업
-	{
-		driver = get_driver_instance();
-		con = driver->connect(server, username, password);
-	}
-	catch (sql::SQLException e)
-	{
-		cout << "Could not connect to server. Error message: " << e.what() << endl;
-		system("pause");
-		exit(1);
-	}
-	// please create database "chatuser_db" ahead of time
-	con->setSchema("chatuser_db");
-	// connector에서 한글 출력을 위한 셋팅
-	stmt = con->createStatement(); // 추가!!
-	stmt->execute("set names euckr"); // 추가!!
-	if (stmt) { delete stmt; stmt = nullptr; } // 추가!!
-	// 데이터베이스 쿼리 실행
-	stmt = con->createStatement();
-	stmt->execute("DROP TABLE IF EXISTS chatuser");
-	cout << "Finished dropping table (if existed)" << endl;
-	stmt->execute("CREATE TABLE chatuser (id serial PRIMARY KEY, name VARCHAR(50), password INTEGER);");
-	cout << "Finished creating table" << endl;
-	delete stmt;
-	pstmt = con->prepareStatement("INSERT INTO chatuser(name, password) VALUES(?,?)");
-	pstmt->setString(1, "박지원");
-	pstmt->setInt(2, 1087);
-	pstmt->execute();
-	cout << "One row inserted." << endl;
-	pstmt->setString(1, "김정관");
-	pstmt->setInt(2, 9876);
-	pstmt->execute();
-	cout << "One row inserted." << endl;
 
-	//아이디/비번 DB에서 검색해서 있는지 확인
-	pstmt = con->prepareStatement("SELECT name, password FROM chatuser;");
-	result = pstmt->executeQuery();
-
-	while (result->next())
-	{
-		printf("Reading from table=(%s, %d)\n", result->getString(1).c_str(), result->getInt(2));
-		
-	}
-	// MySQL Connector/C++ 정리
-	
-	delete pstmt;
-	delete con;
-}
