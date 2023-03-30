@@ -22,6 +22,7 @@ const string password = "1234"; // 데이터베이스 접속 비밀번호
 SOCKET client_sock;
 string my_nick; //아이디 <-콘솔입력값
 int pass;//패스워드 <- 콘솔입력값
+int pass_1;//패스워드확인
 string my_nick2; //아이디 <-DB값
 int pass2;//패스워드<-DB값
 int flag=0; //로그인성공플래그. 1이면성공
@@ -98,31 +99,47 @@ int main() {
 				cin >> my_nick;
 				cout << " 사용할 비밀번호 입력 >>";
 				cin >> pass;
-				//아이디/비번 DB에서 검색해서 있는지 확인
-				pstmt = con->prepareStatement("SELECT name, password FROM chatuser;");
-				result = pstmt->executeQuery();
-				while (result->next())
-				{
-					my_nick2 = result->getString(1).c_str();
-					pass2 = result->getInt(2);
-					if ((my_nick == my_nick2))
+				cout << " 비밀번호 확인 >>";
+				cin >> pass_1;
+				if (pass != pass_1)
+				{cout << "비밀번호를 잘못입력하셨습니다. 처음부터 다시 입력하여 주십시오\n";}
+				else {
+
+
+					//아이디/비번 DB에서 검색해서 있는지 확인
+					pstmt = con->prepareStatement("SELECT name, password FROM chatuser;");
+					result = pstmt->executeQuery();
+					while (result->next())
 					{
-						flag2 = 1;
+						my_nick2 = result->getString(1).c_str();
+						pass2 = result->getInt(2);
+						if ((my_nick == my_nick2))
+						{
+							flag2 = 1;
+						}
 					}
-				}
-				if (flag2 == 1)
-				{
-					printf("중복된닉네임이 존재합니다\n");
-					flag2 = 0;
-				}
-				else
-				{
-					printf("회원가입이완료되었습니다\n");
-					pstmt = con->prepareStatement("INSERT INTO chatuser(name, password) VALUES(?,?)");
-					pstmt->setString(1, my_nick);
-					pstmt->setInt(2, pass);
-					pstmt->execute();
-					break;
+					if (flag2 == 1)
+					{
+						printf("중복된닉네임이 존재합니다\n");
+						flag2 = 0;
+					}
+					else
+					{
+						printf("회원가입이완료되었습니다\n");
+						pstmt = con->prepareStatement("INSERT INTO chatuser(name, password) VALUES(?,?)");
+						pstmt->setString(1, my_nick);
+						pstmt->setInt(2, pass);
+						pstmt->execute();
+
+						pstmt = con->prepareStatement("SELECT name, chat FROM chat;");
+						result = pstmt->executeQuery();
+						while (result->next())
+						{
+						printf("Reading from table=(%s, %s)\n", result->getString(1).c_str(), result->getString(2).c_str());
+
+						}
+						break;
+					}
 				}
 			}
 
@@ -183,15 +200,24 @@ int main() {
 			cout << "connecting..." << endl;
 		}
 		std::thread th2(chat_recv);
+		int count = 0;
 		while (1) {
 			string text;
-			std::getline(cin, text);
-			const char* buffer = text.c_str();
-			send(client_sock, buffer, strlen(buffer), 0);
-			pstmt = con->prepareStatement("INSERT INTO chat(name, chat) VALUES(?,?)");
-			pstmt->setString(1, my_nick);
-			pstmt->setString(2, text);
-			pstmt->execute();
+			if (count == 0) {
+				std::getline(cin, text);
+				const char* buffer = text.c_str();
+
+			}
+			else {
+				std::getline(cin, text);
+				const char* buffer2 = text.c_str();
+				send(client_sock, buffer2, strlen(buffer2), 0);
+				pstmt = con->prepareStatement("INSERT INTO chat(name, chat) VALUES(?,?)");
+				pstmt->setString(1, my_nick);
+				pstmt->setString(2, text);
+				pstmt->execute();
+			}
+			count++;
 		}
 		th2.join();
 		closesocket(client_sock);
